@@ -1,79 +1,87 @@
-from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from typing import List, Optional
-import uuid
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import os
+import uuid
+import openai
+from dotenv import load_dotenv
 
-app = FastAPI()
+load_dotenv()
 
-# Allow frontend to communicate with backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)
 
-# Dummy in-memory storage
-products = []
-orders = []
+# Configuration
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Upload directory
-UPLOAD_DIR = "server/uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Ensure uploads directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.get("/")
-def root():
-    return {"message": "PixelForge21 backend is running."}
+# Helper function to validate file type
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# ========== ROUTES ==========
 
-@app.post("/upload-product/")
-async def upload_product(
-    title: str = Form(...),
-    description: str = Form(...),
-    margin_price: float = Form(...),
-    selling_price: float = Form(...),
-    file: UploadFile = File(...)
-):
-    product_id = str(uuid.uuid4())
-    filename = f"{product_id}_{file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
+# Health Check
+@app.route('/')
+def index():
+    return jsonify({"status": "Backend running successfully"})
 
-    with open(file_path, "wb") as buffer:
-        buffer.write(await file.read())
+# Upload product image
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image part'}), 400
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        return jsonify({'filename': filename}), 200
+    return jsonify({'error': 'File type not allowed'}), 400
 
-    product = {
-        "id": product_id,
-        "title": title,
-        "description": description,
-        "margin_price": margin_price,
-        "selling_price": selling_price,
-        "image_url": f"/uploads/{filename}"
-    }
-    products.append(product)
-    return {"message": "Product uploaded successfully", "product": product}
+# Serve uploaded image
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# AI Chatbot route for customer support
+@app.route('/chat', methods=['POST'])
+def ai_chat():
+    data = request.get_json()
+    user_message = data.get('message')
 
-@app.get("/products/")
-def get_products():
-    return products
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
 
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful customer support assistant for an e-commerce website named PixelForge."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        ai_reply = response['choices'][0]['message']['content']
+        return jsonify({"reply": ai_reply})
 
-@app.post("/place-order/")
-def place_order(order: dict):
-    order_id = str(uuid.uuid4())
-    order["order_id"] = order_id
-    orders.append(order)
-    return {"message": "Order placed", "order_id": order_id}
+    except Exception as e:
+        print(f"Error in OpenAI chat: {e}")
+        return jsonify({"error": "AI chat failed"}), 500
 
+# Add product (dummy route)
+@app.route('/add-product', methods=['POST'])
+def add_product():
+    data = request.get_json()
+    print(f"Received product: {data}")
+    return jsonify({"message": "Product added successfully"}), 200
 
-@app.get("/orders/")
-def get_orders():
-    return orders
-
-
-# Serve images statically (for development only)
-from fastapi.staticfiles import StaticFiles
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+# ========== MAIN ==========
+if __name__ == '__main__':
+    app.run(debug=True)
