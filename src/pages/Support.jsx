@@ -1,27 +1,58 @@
-import React from 'react';
+// src/components/Support.jsx
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const Support = () => {
+  const [input, setInput] = useState('');
+  const [conversation, setConversation] = useState([]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMsg = { role: 'user', text: input };
+    setConversation([...conversation, userMsg]);
+    setInput('');
+
+    try {
+      const res = await axios.post('http://localhost:5000/chat', {
+        message: input,
+      });
+
+      const aiMsg = { role: 'ai', text: res.data.reply };
+      setConversation((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      console.error(err);
+      const errMsg = { role: 'ai', text: 'Something went wrong. Please try again later.' };
+      setConversation((prev) => [...prev, errMsg]);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Support</h2>
-        <p className="text-gray-600 text-center mb-6">
-          Welcome to PixelForge Support. Ask your queries below and our AI Assistant will help you!
-        </p>
-
-        {/* Placeholder Chat UI */}
-        <div className="bg-gray-50 p-4 rounded border mb-4 h-64 overflow-y-auto">
-          <p className="text-sm text-gray-500">[AI Chatbot UI will appear here in future]</p>
-        </div>
-
+    <div className="p-4 max-w-xl mx-auto">
+      <h2 className="text-xl font-bold mb-4">AI Customer Support</h2>
+      <div className="bg-white h-96 overflow-y-auto border rounded p-4 mb-4">
+        {conversation.map((msg, i) => (
+          <div key={i} className={mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}}>
+            <span
+              className={`inline-block px-3 py-2 rounded ${
+                msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-200'
+              }`}
+            >
+              {msg.text}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
         <input
           type="text"
-          placeholder="Type your query here..."
-          className="w-full p-3 border rounded mb-2"
-          disabled
+          value={input}
+          placeholder="Ask something..."
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1 border p-2 rounded"
         />
-        <button className="w-full bg-blue-500 text-white py-2 rounded cursor-not-allowed" disabled>
-          Send (Coming Soon)
+        <button onClick={handleSend} className="bg-blue-600 text-white px-4 py-2 rounded">
+          Send
         </button>
       </div>
     </div>
