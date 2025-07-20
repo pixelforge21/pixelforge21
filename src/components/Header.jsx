@@ -1,32 +1,68 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "react-feather";
+import { FaShoppingCart, FaUserCircle } from "react-icons/fa";
+import SearchBar from "./SearchBar";
 
 const Header = () => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   return (
-    <header className="bg-red-600 text-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-xl font-bold">
-          <img src="/favicon.ico" alt="PixelForge" className="h-8 w-8" />
-          <span>PixelForge</span>
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/favicon.ico" alt="PixelForge" className="w-8 h-8" />
+          <span className="text-xl font-bold text-red-600">PixelForge</span>
         </Link>
 
         {/* Search Bar */}
-        <div className="flex-1 mx-4">
-          <input
-            type="text"
-            placeholder="Search for Products"
-            className="w-full px-4 py-2 rounded focus:outline-none text-black"
-          />
+        <div className="flex-grow mx-6 max-w-2xl">
+          <SearchBar />
         </div>
 
-        {/* Right Options */}
-        <div className="flex items-center gap-6">
-          <Link to="/login" className="hover:underline">Login</Link>
-          <Link to="/cart" className="relative">
-            <ShoppingCart />
-            <span className="absolute -top-2 -right-2 bg-white text-red-600 text-xs rounded-full px-1 font-bold">0</span>
+        {/* Icons */}
+        <div className="flex items-center gap-5 relative">
+          
+          {/* Profile Dropdown */}
+          <div className="relative">
+            <button
+              className="text-gray-700 hover:text-red-600 text-2xl focus:outline-none"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <FaUserCircle />
+            </button>
+
+            {/* Dropdown Menu */}
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border rounded-lg shadow-md z-50">
+                <ul className="text-sm text-gray-700">
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <Link to="/profile">My Account</Link>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <Link to="/orders">My Orders</Link>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <Link to="/support">Customer Support</Link>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <Link to="/offers">Offers & Sales</Link>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <Link to="/updates">Seller Updates</Link>
+                  </li>
+                  <li className="px-4 py-2 hover:bg-gray-100">
+                    <button className="w-full text-left">Logout</button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Cart Icon */}
+          <Link to="/cart" className="text-gray-700 hover:text-red-600 text-2xl">
+            <FaShoppingCart />
           </Link>
         </div>
       </div>
