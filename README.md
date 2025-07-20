@@ -39,3 +39,8 @@
 ---
 
 ## 📁 Project Folder Structure
+
+pixelforge21/ ├── backend/ │   ├── app.py │   ├── config.py │   ├── uploads/               # For storing uploaded images │ ├── public/ │   ├── favicon.ico │   └── index.html │ ├── src/ │   ├── components/ │   │   ├── Header.jsx │   │   ├── Footer.jsx │   │   ├── Loader.jsx │   │   ├── ProfileMenu.jsx │   │   ├── SearchBar.jsx │   │   ├── Cart.jsx │   │   ├── Home.jsx │   │   ├── Login.jsx │   │   ├── Signup.jsx │   │   ├── MyOrders.jsx │   │   ├── ProductDetails.jsx │   │   ├── SellerDashboard.jsx │   │   └── Support.jsx │   ├── App.jsx │   ├── index.js │   └── index.css │ ├── package.json ├── requirements.txt ├── README.md
+
+
+
