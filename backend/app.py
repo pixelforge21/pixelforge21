@@ -1,87 +1,110 @@
+import os
+import time
+import threading
+import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import os
-import uuid
-import openai
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import openai
 
+# Load environment variables
 load_dotenv()
 
-# Initialize Flask app
+# Configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Initialize app
 app = Flask(__name__)
 CORS(app)
-
-# Configuration
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# OpenAI API Key
+openai.api_key = os.getenv("")
 
 # Ensure uploads directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Helper function to validate file type
+# Utility function to check allowed files
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ========== ROUTES ==========
+# ---------------------- ROUTES ----------------------
 
-# Health Check
+# Health check
 @app.route('/')
-def index():
-    return jsonify({"status": "Backend running successfully"})
+def home():
+    return jsonify({"status": "Backend is running"}), 200
 
-# Upload product image
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image part'}), 400
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    if file and allowed_file(file.filename):
-        filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        return jsonify({'filename': filename}), 200
-    return jsonify({'error': 'File type not allowed'}), 400
-
-# Serve uploaded image
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-# AI Chatbot route for customer support
+# AI Chat endpoint
 @app.route('/chat', methods=['POST'])
-def ai_chat():
-    data = request.get_json()
-    user_message = data.get('message')
-
-    if not user_message:
-        return jsonify({"error": "No message provided"}), 400
-
+def chat():
     try:
+        data = request.get_json()
+        user_message = data.get("message", "")
+        if not user_message:
+            return jsonify({"error": "Message is required"}), 400
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful customer support assistant for an e-commerce website named PixelForge."},
-                {"role": "user", "content": user_message}
-            ]
+            messages=[{"role": "user", "content": user_message}]
         )
-        ai_reply = response['choices'][0]['message']['content']
-        return jsonify({"reply": ai_reply})
+
+        reply = response['choices'][0]['message']['content']
+        return jsonify({"reply": reply})
 
     except Exception as e:
-        print(f"Error in OpenAI chat: {e}")
-        return jsonify({"error": "AI chat failed"}), 500
+        return jsonify({"error": str(e)}), 500
 
-# Add product (dummy route)
-@app.route('/add-product', methods=['POST'])
-def add_product():
+# Product image upload
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        return jsonify({"filename": filename, "url": f"/uploads/{filename}"}), 200
+
+    return jsonify({"error": "Invalid file type"}), 400
+
+# Serve uploaded files
+@app.route('/uploads/<filename>')
+def serve_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# Dummy order endpoint (placeholder for Shiprocket)
+@app.route('/orders', methods=['POST'])
+def create_order():
     data = request.get_json()
-    print(f"Received product: {data}")
-    return jsonify({"message": "Product added successfully"}), 200
+    # You can add validation here
+    return jsonify({"message": "Order received", "data": data}), 200
 
-# ========== MAIN ==========
+# ---------------------- SELF-PING (RENDER) ----------------------
+
+def self_ping():
+    while True:
+        try:
+            print("Self-pinging backend to prevent sleep...")
+            requests.get("https://your-backend-url.onrender.com")  # Replace this with your actual Render URL
+        except Exception as e:
+            print("Self-ping failed:", e)
+        time.sleep(300)  # every 5 minutes
+
+# Start self-ping thread
+ping_thread = threading.Thread(target=self_ping)
+ping_thread.daemon = True
+ping_thread.start()
+
+# ---------------------- MAIN ----------------------
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=5000)
