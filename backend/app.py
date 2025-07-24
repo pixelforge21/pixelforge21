@@ -2,6 +2,8 @@ import os
 import razorpay
 import openai
 import requests
+import threading
+import time
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -31,6 +33,21 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ----------- Self Ping -----------
+
+def start_self_ping():
+    def ping():
+        while True:
+            try:
+                print("[Ping] Sending keep-alive request...")
+                requests.get("https://your-backend-url.onrender.com/keep_alive")
+            except Exception as e:
+                print(f"[Ping Error] {e}")
+            time.sleep(1200)  # every 20 minutes
+    thread = threading.Thread(target=ping)
+    thread.daemon = True
+    thread.start()
 
 # ----------- Routes -----------
 
@@ -121,4 +138,5 @@ def forward_order_to_shiprocket():
 # ----------- Main App Run -----------
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    start_self_ping()
+    app.run(debug=False, host='0.0.0.0', port=5000)
