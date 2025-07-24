@@ -1,37 +1,46 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const Carousel = ({ images = [] }) => {
-  const [index, setIndex] = React.useState(0);
+export default function Carousel({ images = [] }) {
+  const [index, setIndex] = useState(0);
+  const hasImages = images.length > 0;
 
-  const prev = () => setIndex((i) => (i === 0 ? images.length - 1 : i - 1));
-  const next = () => setIndex((i) => (i + 1) % images.length);
+  const prev = () => {
+    if (hasImages) setIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const next = () => {
+    if (hasImages) setIndex((prev) => (prev + 1) % images.length);
+  };
+
+  useEffect(() => {
+    if (hasImages) {
+      const timer = setInterval(next, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [index, images.length]);
+
+  if (!hasImages) return null;
 
   return (
-    <div className="relative w-full h-56 md:h-72 overflow-hidden">
-      {images.length > 0 && (
-        <>
-          <img
-            src={images[index]}
-            alt={Slide ${index}}
-            className="w-full h-full object-cover transition-all duration-300"
-          />
-          <button
-            onClick={prev}
-            className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white p-1 rounded-full shadow"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            onClick={next}
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white p-1 rounded-full shadow"
-          >
-            <ChevronRight />
-          </button>
-        </>
-      )}
+    <div className="relative w-full h-60 md:h-80 overflow-hidden rounded-lg">
+      {images.map((img, i) => (
+        <img
+          key={i}
+          src={img}
+          alt={slide-${i}}
+          className={`absolute w-full h-full object-cover transition-opacity duration-700 ${
+            i === index ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
+      <button onClick={prev} className="absolute top-1/2 left-4 -translate-y-1/2 bg-white p-2 rounded-full shadow">
+        <ChevronLeft />
+      </button>
+      <button onClick={next} className="absolute top-1/2 right-4 -translate-y-1/2 bg-white p-2 rounded-full shadow">
+        <ChevronRight />
+      </button>
     </div>
   );
-};
+}
 
-export default Carousel;
