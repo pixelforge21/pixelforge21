@@ -1,15 +1,16 @@
-import axios from 'axios';
-
-const BASE_URL = "https://pixelforge21.onrender.com"; // Your backend URL
-
-export const sendOTP = async (contact) => {
-  return await axios.post(${BASE_URL}/auth/send-otp, { contact });
-};
-
-export const verifyOTP = async (contact, otp) => {
-  return await axios.post(${BASE_URL}/auth/verify-otp, { contact, otp });
-};
+import axiosInstance from "@/utils/api/axiosInstance";
 
 export const registerUser = async (userData) => {
-  return await axios.post(${BASE_URL}/auth/register, userData);
+  const response = await axiosInstance.post("/register", userData);
+  return response.data;
+};
+
+export const sendOTP = async (phoneOrEmail) => {
+  const response = await axiosInstance.post("/send-otp", phoneOrEmail);
+  return response.data;
+};
+
+export const verifyOTP = async (otpData) => {
+  const response = await axiosInstance.post("/verify-otp", otpData);
+  return response.data;
 };
