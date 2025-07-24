@@ -41,7 +41,7 @@ def start_self_ping():
         while True:
             try:
                 print("[Ping] Sending keep-alive request...")
-                requests.get("https://your-backend-url.onrender.com/keep_alive")
+                requests.get("https://pixelforge21.onrender.com/keep_alive")
             except Exception as e:
                 print(f"[Ping Error] {e}")
             time.sleep(1200)  # every 20 minutes
