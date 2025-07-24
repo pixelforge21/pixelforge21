@@ -10,3 +10,4 @@ Pillow
 Werkzeug
 razorpay
 openai
+setuptools
