@@ -1,37 +1,31 @@
-import React, { useState } from 'react';
-import { verifyOTP } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
 
-function OTPVerify() {
-  const [otp, setOTP] = useState('');
-  const contact = localStorage.getItem("contact");
-  const navigate = useNavigate();
+import React, { useState } from "react";
 
-  const handleVerify = async () => {
-    try {
-      const res = await verifyOTP(contact, otp);
-      localStorage.setItem("token", res.data.token); // Optional
-      navigate('/');
-    } catch (err) {
-      alert("Invalid OTP");
-    }
+const OTPVerify = () => {
+  const [otp, setOtp] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Verify OTP logic
+    console.log("Verifying OTP:", otp);
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold">Enter OTP</h2>
-      <input
-        type="text"
-        placeholder="Enter OTP"
-        value={otp}
-        onChange={(e) => setOTP(e.target.value)}
-        className="border p-2 w-full mt-2"
-      />
-      <button onClick={handleVerify} className="bg-green-600 text-white px-4 py-2 mt-3 rounded">
-        Verify OTP
-      </button>
+    <div className="max-w-sm mx-auto mt-10 p-6 shadow bg-white rounded">
+      <h2 className="text-lg font-bold mb-4 text-center">OTP Verification</h2>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full p-2 border rounded"
+        />
+        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">Verify</button>
+      </form>
     </div>
   );
-}
+};
 
 export default OTPVerify;
+
