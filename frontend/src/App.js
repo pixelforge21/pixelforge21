@@ -1,18 +1,22 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Profile from './pages/Profile';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Support from './pages/Support';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-function App() {
+import Home from './pages/Home';
+import ProductPage from './pages/ProductPage';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import OTPVerification from './pages/OTPVerification';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Profile from './pages/Profile';
+import Orders from './pages/Orders';
+import Offers from './pages/Offers';
+import Support from './pages/Support';
+import NotFound from './pages/NotFound';
+
+const App = () => {
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
@@ -20,20 +24,23 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-otp" element={<OTPVerification />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/orders" element={<Orders />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/offers" element={<Offers />} />
             <Route path="/support" element={<Support />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />
       </div>
     </Router>
   );
-}
+};
 
 export default App;
