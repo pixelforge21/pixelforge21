@@ -1,36 +1,74 @@
-import React, { useState } from 'react';
-import { sendOTP } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
 
-function Login() {
-  const [contact, setContact] = useState('');
-  const navigate = useNavigate();
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  const handleSendOTP = async () => {
-    try {
-      await sendOTP(contact);
-      localStorage.setItem("contact", contact);
-      navigate('/verify');
-    } catch (err) {
-      alert("Error sending OTP");
+  const sendOtp = async () => {
+    const res = await fetch("https://pixelforge21.onrender.com/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.success) setOtpSent(true);
+  };
+
+  const verifyOtp = async () => {
+    const res = await fetch("https://pixelforge21.onrender.com/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem("token", data.token);
+      window.location.href = "/";
     }
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold">Login</h2>
-      <input
-        type="text"
-        placeholder="Email or Mobile"
-        value={contact}
-        onChange={(e) => setContact(e.target.value)}
-        className="border p-2 w-full mt-2"
-      />
-      <button onClick={handleSendOTP} className="bg-blue-600 text-white px-4 py-2 mt-3 rounded">
-        Send OTP
-      </button>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
+        <h2 className="text-2xl font-semibold mb-4">Login</h2>
+        {!otpSent ? (
+          <>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="border px-4 py-2 w-full mb-4"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button
+              onClick={sendOtp}
+              className="bg-blue-500 text-white px-4 py-2 w-full rounded"
+            >
+              Send OTP
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              className="border px-4 py-2 w-full mb-4"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+            />
+            <button
+              onClick={verifyOtp}
+              className="bg-green-500 text-white px-4 py-2 w-full rounded"
+            >
+              Verify OTP
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default Login;
+
