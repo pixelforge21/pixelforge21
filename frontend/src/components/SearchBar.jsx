@@ -1,20 +1,17 @@
-import React from "react";
 import { Search } from "lucide-react";
 
-const SearchBar = ({ onSearch }) => {
+export default function SearchBar({ onSearch }) {
   return (
-    <div className="flex items-center w-full max-w-xl mx-auto px-4 py-2">
+    <div className="flex w-full max-w-lg border border-gray-300 rounded-lg overflow-hidden">
       <input
         type="text"
-        placeholder="Search for products..."
-        className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none"
-        onChange={(e) => onSearch(e.target.value)}
+        placeholder="Search products..."
+        className="flex-grow px-4 py-2 outline-none"
+        onChange={(e) => onSearch && onSearch(e.target.value)}
       />
-      <button className="bg-red-500 text-white px-4 py-2 rounded-r-full">
-        <Search className="w-5 h-5" />
+      <button className="bg-blue-600 text-white px-4">
+        <Search size={20} />
       </button>
     </div>
   );
-};
-
-export default SearchBar;
+}
