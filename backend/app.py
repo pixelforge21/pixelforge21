@@ -2,19 +2,21 @@ import os
 import razorpay
 import openai
 import requests
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-from datetime import datetime
 
 # Load environment variables
 load_dotenv()
 
 # App setup
-app = Flask(__name__, static_folder="build", static_url_path="")
+app = Flask(__name__)
 
 # Razorpay setup
-razorpay_client = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET")))
+razorpay_client = razorpay.Client(auth=(
+    os.getenv("RAZORPAY_KEY_ID"), 
+    os.getenv("RAZORPAY_KEY_SECRET")
+))
 
 # OpenAI setup
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -25,11 +27,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Helper: allowed file types
+# ----------- Helpers -----------
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --------------------------- ROUTES --------------------------- #
+# ----------- Routes -----------
 
 @app.route('/keep_alive')
 def keep_alive():
@@ -42,9 +45,9 @@ def upload_file():
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(save_path)
-        return jsonify({'message': 'File uploaded successfully', 'filename': filename})
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(path)
+        return jsonify({'message': 'File uploaded', 'filename': filename})
     return jsonify({'error': 'Invalid file type'}), 400
 
 @app.route('/chat', methods=['POST'])
@@ -59,20 +62,19 @@ def ai_chat():
                 {"role": "user", "content": prompt}
             ]
         )
-        answer = response['choices'][0]['message']['content'].strip()
-        return jsonify({'response': answer})
+        reply = response['choices'][0]['message']['content'].strip()
+        return jsonify({'response': reply})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/create-order', methods=['POST'])
 def create_order():
     data = request.json
-    amount = int(data.get("amount")) * 100  # Razorpay expects paise
-    currency = "INR"
+    amount = int(data.get("amount", 0)) * 100  # paise
     try:
         order = razorpay_client.order.create({
             "amount": amount,
-            "currency": currency,
+            "currency": "INR",
             "payment_capture": "1"
         })
         return jsonify(order)
@@ -82,55 +84,41 @@ def create_order():
 @app.route('/razorpay-webhook', methods=['POST'])
 def razorpay_webhook():
     data = request.get_json()
-    # Verify signature here if needed
+    # Optional: Add signature verification here
     payment_id = data.get("payload", {}).get("payment", {}).get("entity", {}).get("id")
     amount = data.get("payload", {}).get("payment", {}).get("entity", {}).get("amount")
-
-    # Send confirmation email + notify seller (you can add your logic)
-    print(f"Received payment: {payment_id}, Amount: ₹{int(amount)/100}")
-
-    return jsonify({'status': 'Webhook received'})
-
-@app.route('/shiprocket/forward', methods=['POST'])
-def forward_order_to_shiprocket():
-    data = request.get_json()
-    # Construct Shiprocket order payload and call Shiprocket API
-    try:
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('SHIPROCKET_TOKEN')}"
-        }
-        response = requests.post("https://apiv2.shiprocket.in/v1/external/orders/create/adhoc", 
-                                 headers=headers, json=data)
-        return jsonify(response.json())
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    print(f"Webhook: Payment ID={payment_id}, Amount={int(amount)/100}")
+    return jsonify({'status': 'Webhook received'}), 200
 
 @app.route('/process-refund', methods=['POST'])
 def process_refund():
     data = request.get_json()
     payment_id = data.get("payment_id")
-    amount = data.get("amount")
+    amount = int(data.get("amount", 0)) * 100
     try:
-        refund = razorpay_client.payment.refund(payment_id, {"amount": int(amount)*100})
+        refund = razorpay_client.payment.refund(payment_id, {"amount": amount})
         return jsonify(refund)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Serve React frontend
-@app.route('/')
-def serve_index():
-    return send_from_directory(app.static_folder, 'index.html')
+@app.route('/shiprocket/forward', methods=['POST'])
+def forward_order_to_shiprocket():
+    data = request.get_json()
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {os.getenv('SHIPROCKET_TOKEN')}"
+        }
+        response = requests.post(
+            "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+            headers=headers,
+            json=data
+        )
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-@app.route('/<path:path>')
-def serve_static(path):
-    file_path = os.path.join(app.static_folder, path)
-    if os.path.exists(file_path):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
-
-# --------------------------- MAIN --------------------------- #
+# ----------- Main App Run -----------
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
