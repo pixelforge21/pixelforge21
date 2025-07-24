@@ -1,1 +1,40 @@
+# Node modules and build
+node_modules/
+build/
+dist/
+.cache/
+.next/
+out/
+*.log
 
+# dotenv files (excluded intentionally)
+.env
+.env.*
+!.env.example
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Testing and debug
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local environments
+*.local
+*.swo
+*.swp
+*.bak
+
+# Misc
+*.tgz
+*.tar.gz
+*.zip
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
