@@ -1,27 +1,29 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
   content: [
-    "./src//*.{js,jsx,ts,tsx}",
+    "./src//*.{js,jsx,ts,tsx}", // Ensures Tailwind scans all React components
+    "./public/index.html"         // Optional but good for purging unused styles
   ],
   theme: {
-    container: {
-      center: true,
-      padding: '1rem', // Adds side padding to your container for better spacing
-    },
     extend: {
       colors: {
-        primary: '#e40046', // Snapdeal-style red
-        secondary: '#f7f7f7',
-        dark: '#333333',
+        primary: '#e40046',   // Snapdeal's red (you can change for your brand)
+        secondary: '#f5f5f5',
+        accent: '#202124',
       },
       fontFamily: {
-        sans: ['"Helvetica Neue"', 'sans-serif'],
+        sans: ['Inter', 'Helvetica', 'Arial', 'sans-serif'],
       },
-      boxShadow: {
-        header: '0 2px 4px rgba(0, 0, 0, 0.05)',
+      container: {
+        center: true,
+        padding: '1rem',
       },
     },
   },
-  plugins: [],
-};
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/typography'),
+  ],
+}
 
