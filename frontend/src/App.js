@@ -7,14 +7,14 @@ import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import OTPVerification from './pages/OTPVerify';
+import OTPVerification from './components/OTPVerification';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
 import Orders from './pages/MyOrder';
 import Support from './pages/Support';
 import NotFound from './pages/NotFound';
-import Offers from './pages/Offers'; // ✅ Added missing import
+ // ✅ Added missing import
 
 const App = () => {
   return (
