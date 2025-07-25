@@ -13,6 +13,9 @@ import smtplib
 from email.message import EmailMessage
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash
+from flask_cors import CORS
+
+CORS(app, origins=["https://pixelforge21-frontend.onrender.com"])
 
 # Load environment variables
 load_dotenv()
