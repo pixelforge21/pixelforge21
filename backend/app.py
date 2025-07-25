@@ -4,7 +4,7 @@ import openai
 import requests
 import threading
 import time
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from bson import ObjectId
@@ -140,7 +140,6 @@ def forward_order_to_shiprocket():
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        from flask import request, jsonify
 
 client = MongoClient(os.environ.get("MONGODB_URI"))
 db = client['pixelforge21']
