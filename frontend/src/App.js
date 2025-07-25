@@ -11,7 +11,7 @@ import OTPVerify from './pages/OTPVerify';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
-import MyOrders from './pages/MyOrders';
+import MyOrder from './pages/MyOrder';
 import Support from './pages/Support';
 import NotFound from './pages/NotFound';
  // ✅ Added missing import
@@ -31,7 +31,7 @@ const App = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/myorders" element={<MyOrders />} />
+            <Route path="/myorder" element={<MyOrder />} />
             <Route path="/support" element={<Support />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
