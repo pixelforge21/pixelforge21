@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import ProductPage from './pages/ProductPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import OTPVerification from './components/OTPVerification';
+import OTPVerify from './pages/OTPVerify';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
@@ -27,7 +27,7 @@ const App = () => {
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/verify-otp" element={<OTPVerification />} />
+            <Route path="/verify-otp" element={<OTPVerify />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
