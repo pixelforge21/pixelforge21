@@ -11,7 +11,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch("https://pixelforge21.onrender.com")
+    fetch ("https://pixelforge21.onrender.com/products")
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
