@@ -28,7 +28,7 @@ export default function Carousel({ images = [] }) {
         <img
           key={i}
           src={img}
-          alt={slide-${i}}
+          alt={`slide-${i}`}
           className={`absolute w-full h-full object-cover transition-opacity duration-700 ${
             i === index ? "opacity-100" : "opacity-0"
           }`}
