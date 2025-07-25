@@ -14,12 +14,7 @@ import Profile from './pages/Profile';
 import Orders from './pages/MyOrder';
 import Support from './pages/Support';
 import NotFound from './pages/NotFound';
-import AppRoutes from './routes';
-
-function App() {
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <AppRoutes />
+import Offers from './pages/Offers'; // ✅ Added missing import
 
 const App = () => {
   return (
@@ -48,4 +43,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App;  
