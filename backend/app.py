@@ -124,6 +124,10 @@ def process_refund():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+shiprocket_token =
+os.getenv("SHIPROCKET_TOKEN")
+
 @app.route('/shiprocket/forward', methods=['POST'])
 def forward_order_to_shiprocket():
     data = request.get_json()
