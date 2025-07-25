@@ -78,6 +78,12 @@ def upload_file():
         return jsonify({'message': 'File uploaded', 'filename': filename})
     return jsonify({'error': 'Invalid file type'}), 400
 
+
+@app.route('/products', methods=['GET'])
+def get_products():
+    products = list(products_collection.find({}, {'_id': 0}))
+    return jsonify(products)
+
 @app.route('/chat', methods=['POST'])
 def ai_chat():
     data = request.json
