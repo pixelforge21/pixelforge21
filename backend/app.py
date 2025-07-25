@@ -16,6 +16,7 @@ from werkzeug.security import generate_password_hash
 from flask import flask
 from flask_cors import CORS
 
+app = Flask(__name__)
 CORS(app, origins=["https://pixelforge21-frontend.onrender.com"])
 
 # Load environment variables
