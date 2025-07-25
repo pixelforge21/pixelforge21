@@ -1,12 +1,13 @@
-import axios from "axios";
-baseURL:
-'https://pixelforge21.onrender.com/api'
+// src/utils/axiosInstance.js
+import axios from 'axios';
 
-const axiosInstance = axios.create({
+const instance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
+  withCredentials: true, // Include cookies if needed (for auth/session APIs)
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
-export default axiosInstance;
+export default instance;
