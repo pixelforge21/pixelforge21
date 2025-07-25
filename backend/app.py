@@ -7,6 +7,12 @@ import time
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from bson import ObjectId
+import random
+import smtplib
+from email.message import EmailMessage
+from pymongo import MongoClient
+from werkzeug.security import generate_password_hash
 
 # Load environment variables
 load_dotenv()
@@ -134,6 +140,81 @@ def forward_order_to_shiprocket():
         return jsonify(response.json())
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+        from flask import request, jsonify
+
+client = MongoClient(os.environ.get("MONGODB_URI"))
+db = client['pixelforge21']
+users = db['users']
+otps = db['otps']
+
+def send_otp_email(recipient, otp):
+    msg = EmailMessage()
+    msg.set_content(f"Your OTP is: {otp}")
+    msg['Subject'] = 'PixelForge21 Signup OTP'
+    msg['From'] = os.environ.get("EMAIL_USER")
+    msg['To'] = recipient
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(os.environ.get("EMAIL_USER"), os.environ.get("EMAIL_PASS"))
+            smtp.send_message(msg)
+        return True
+    except Exception as e:
+        print("Email send failed:", e)
+        return False
+
+@app.route("/auth/send-otp", methods=["POST"])
+def send_otp():
+    data = request.json
+    name = data.get("name")
+    email = data.get("email")
+    mobile = data.get("mobile")
+    password = data.get("password")
+
+    if users.find_one({"$or": [{"email": email}, {"mobile": mobile}]}):
+        return jsonify({"success": False, "message": "User already exists"}), 400
+
+    otp = str(random.randint(100000, 999999))
+    hashed_password = generate_password_hash(password)
+
+    temp_user = {
+        "name": name,
+        "email": email,
+        "mobile": mobile,
+        "password": hashed_password,
+        "otp": otp
+    }
+
+    result = otps.insert_one(temp_user)
+
+    if send_otp_email(email, otp):
+        return jsonify({"success": True, "userId": str(result.inserted_id)})
+    else:
+        otps.delete_one({"_id": result.inserted_id})
+        return jsonify({"success": False, "message": "Failed to send OTP"}), 500
+
+@app.route("/auth/verify-otp", methods=["POST"])
+def verify_otp():
+    data = request.json
+    user_id = data.get("userId")
+    input_otp = data.get("otp")
+
+    temp_user = otps.find_one({"_id": ObjectId(user_id)})
+    if not temp_user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+
+    if temp_user["otp"] == input_otp:
+        user = {
+            "name": temp_user["name"],
+            "email": temp_user["email"],
+            "mobile": temp_user["mobile"],
+            "password": temp_user["password"]
+        }
+        users.insert_one(user)
+        otps.delete_one({"_id": ObjectId(user_id)})
+        return jsonify({"success": True, "message": "User verified and registered"})
+    else:
+        return jsonify({"success": False, "message": "Incorrect OTP"}), 400
 
 # ----------- Main App Run -----------
 
