@@ -30,6 +30,7 @@ const AppRoutes = () => {
       <Route path="/orders" element={<Orders />} />
       <Route path="/support" element={<Support />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/" element={<h1 className="text-3xl">Site Works!</h1>} />
     </Routes>
   );
 };
