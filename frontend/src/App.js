@@ -11,7 +11,7 @@ import OTPVerify from './pages/OTPVerify';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
-import Orders from './pages/MyOrder';
+import MyOrders from './pages/MyOrders';
 import Support from './pages/Support';
 import NotFound from './pages/NotFound';
  // ✅ Added missing import
