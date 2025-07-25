@@ -1,3 +1,32 @@
+/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles (optional) */
+body {
+  @apply bg-white text-gray-900 font-sans;
+  scroll-behavior: smooth;
+}
+
+button {
+  @apply focus:outline-none;
+}
+
+/* Scrollbar Styling (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #e40046;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #b40036;
+}
